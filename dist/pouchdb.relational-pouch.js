@@ -507,13 +507,77 @@ exports.setSchema = function (schema) {
     });
   }
 
-  function _findHasMany(type, belongsToKey, belongsToId, foundObjects) {
-  	var selector = {
+  function query(type, query) {
+    var queryParams = {
+      selector: _buildSelector(type, query.filter)
+    };
+
+    if (query.sort) {
+      queryParams.sort = _buildSort(query.sort);
+    }
+
+    return db.find(queryParams).then(function(pouchRes) { return db.rel.parseRelDocs(type, pouchRes.docs);});
+  }
+  
+  /**
+   * Return key that conform to data adapter
+   * ex: 'name' become 'data.name'
+   */
+  function _dataKey(key) {
+    var dataKey ='data.' + key;
+    return ""+ dataKey + "";
+  }
+
+  /**
+   * Returns the modified sort key
+   * Ex: sort: ['series'] will become ['data.series']
+   * Ex: sort: [{series: 'desc'}] will became [{'data.series': 'desc'}]
+   */
+  function _buildSort(sort) {
+    return sort.map(function (value) {
+      var sortKey = {};
+      if (typeof value === 'object' && value !== null) {
+        for (var key in value) {
+          if(value.hasOwnProperty(key)){
+            sortKey[_dataKey(key)] = value[key];
+          }
+        }
+      } else {
+        return _dataKey(value);
+      }
+      return sortKey;
+    }.bind(this));
+  }
+  
+  /**
+   * Returns the modified selector key to comform data key
+   * Ex: selector: {name: 'Mario'} wil become selector: {'data.name': 'Mario'}
+   */
+  function _buildSelector(type, selector) {
+    var dataSelector = {
             '_id': {
                 '$gt': makeDocID({type: type}),
                 '$lt': makeDocID({type: type, id: {}})
             }
         };
+    var selectorKeys = [];
+
+    for (var key in selector) {
+      if(selector.hasOwnProperty(key)){
+        selectorKeys.push(key);
+      }
+    }
+
+    selectorKeys.forEach(function(key) {
+      var dataKey = _dataKey(key);
+      dataSelector[dataKey] = selector[key];
+    }.bind(this));
+
+    return dataSelector;
+  }
+  
+  function _findHasMany(type, belongsToKey, belongsToId, foundObjects) {
+  	var selector = _buildSelector(type, {});
     selector['data.' + belongsToKey] = belongsToId;
 
     //only use opts for return ids or whole doc? returning normal documents is not really good
@@ -567,6 +631,7 @@ exports.setSchema = function (schema) {
     save: save,
     find: find,
     findHasMany: findHasMany,
+    query: query,
     del: del,
     getAttachment: getAttachment,
     putAttachment: putAttachment,
