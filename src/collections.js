@@ -1,6 +1,7 @@
-'use strict';
-exports.Map = LazyMap; // TODO: use ES6 map
-exports.Set = LazySet; // TODO: use ES6 set
+var collections = {};
+
+collections.Map = LazyMap; // TODO: use ES6 map
+collections.Set = LazySet; // TODO: use ES6 set
 // based on https://github.com/montagejs/collections
 function LazyMap() {
   this.store = {};
@@ -72,3 +73,5 @@ LazySet.prototype.has = function (key) {
 LazySet.prototype.delete = function (key) {
   return this.store.delete(key);
 };
+
+export default collections;

@@ -1,11 +1,7 @@
-'use strict';
-
-var utils = require('./pouch-utils');
-var extend = utils.extend;
-var Promise = utils.Promise;
-var collections = require('./collections');
-var uuid = require('./uuid');
-var uniq = require('uniq');
+import { extend, series } from './pouch-utils';
+import collections from './collections';
+import uuid from './uuid';
+import uniq from 'uniq';
 
 function createError(str) {
   var err = new Error(str);
@@ -52,7 +48,7 @@ function deserialize(str) {
   return id;
 }
 
-exports.setSchema = function (schema) {
+function setSchema(schema) {
   var db = this;
 
   var keysToSchemas = new collections.Map();
@@ -248,11 +244,11 @@ exports.setSchema = function (schema) {
 
     return db.get(serialize(typeInfo.documentType, id))
       .then(function (doc) { return !!doc._deleted; })
-      .catch(function (err) { return err.reason === "deleted" ? true : null; });
+      .catch(function (err) { return err.reason === 'deleted' ? true : null; });
   }
 
   function _parseAlldocs(type, foundObjects, pouchRes) {
-  	return _parseRelDocs(type, foundObjects, pouchRes.rows.filter(function (row) {
+    return _parseRelDocs(type, foundObjects, pouchRes.rows.filter(function (row) {
       return row.doc && !row.value.deleted;
     }).map(function (row) {
       return row.doc;
@@ -260,17 +256,17 @@ exports.setSchema = function (schema) {
   }
 
   function parseRelDocs(type, pouchDocs) {
-  	return _parseRelDocs(type, new collections.Map(), pouchDocs);
+    return _parseRelDocs(type, new collections.Map(), pouchDocs);
   }
 
   function _parseRelDocs(type, foundObjects, pouchDocs) {
-  	var typeInfo = getTypeInfo(type);
+    var typeInfo = getTypeInfo(type);
 
-  	if (!foundObjects.has(type)) {
+    if (!foundObjects.has(type)) {
       foundObjects.set(type, new collections.Map());
     }
 
-  	return Promise.resolve().then(function() {
+    return Promise.resolve().then(function() {
       var tasks = pouchDocs.map(function (doc) {
         var obj = fromRawDoc(doc);
 
@@ -316,7 +312,7 @@ exports.setSchema = function (schema) {
             if (relationOptions.queryInverse) {
               subTasks.push(_findHasMany(relatedType, relationOptions.queryInverse,
                                          obj.id, foundObjects)
-                            .then(function () { return; }));
+                .then(function () { return; }));
               return;
             }
 
@@ -364,7 +360,7 @@ exports.setSchema = function (schema) {
         });
       });
 
-      return utils.series(Object.keys(typesToIds).map(function (relatedType) {
+      return series(Object.keys(typesToIds).map(function (relatedType) {
         var relatedIds = uniq(typesToIds[relatedType]);
         return function () {return _find(relatedType, relatedIds, foundObjects); };
       })).then(function () {
@@ -442,7 +438,7 @@ exports.setSchema = function (schema) {
 
     //only use opts for return ids or whole doc? returning normal documents is not really good
     return db.find({ selector: selector }).then(function(findRes) {
-    	return _parseRelDocs(type, foundObjects, findRes.docs);
+      return _parseRelDocs(type, foundObjects, findRes.docs);
     });
   }
 
@@ -500,9 +496,6 @@ exports.setSchema = function (schema) {
     parseRelDocs: parseRelDocs,
     isDeleted: isDeleted,
   };
-};
-
-/* istanbul ignore next */
-if (typeof window !== 'undefined' && window.PouchDB) {
-  window.PouchDB.plugin(exports);
 }
+
+export default {setSchema};

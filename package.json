@@ -25,44 +25,56 @@
     "test-browser": "node ./bin/test-browser.js",
     "jshint": "jshint -c .jshintrc lib test/test.js",
     "test": "npm run jshint && bash ./bin/run-test.sh",
-    "build": "mkdirp dist && browserify -t es3ify -s RelationalPouch lib/index.js -o dist/pouchdb.relational-pouch.js && npm run min",
+    "build": "mkdirp dist && browserify -t es3ify -s RelationalPouch lib/index-browser.js -o dist/pouchdb.relational-pouch.js && npm run min",
     "min": "uglifyjs dist/pouchdb.relational-pouch.js -mc > dist/pouchdb.relational-pouch.min.js",
     "dev": "browserify test/test.js > test/test-bundle.js && npm run dev-server",
     "dev-server": "node ./bin/dev-server.js",
     "coverage": "npm test --coverage && istanbul check-coverage --lines 100 --function 100 --statements 100 --branches 100"
   },
   "dependencies": {
-    "argsarray": "0.0.1",
-    "es3ify": "^0.2.2",
-    "inherits": "~2.0.3",
-    "lie": "^3.1.1",
     "pouchdb-extend": "^0.1.2",
-    "pouchdb-promise": "^6.4.1",
     "uniq": "^1.0.1"
   },
   "peerDependencies": {
     "pouchdb-find": "^6.4.1"
   },
   "devDependencies": {
+    "argsarray": "0.0.1",
+    "babel-core": "^6.26.3",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-preset-env": "^1.6.1",
     "blob-util": "^1.3.0",
     "bluebird": "^3.5.1",
     "browserify": "^15.0.0",
+    "builtin-modules": "^2.0.0",
     "chai": "~3.5.0",
     "chai-as-promised": "~5.3.0",
+    "eslint": "^4.19.1",
+    "events": "^2.0.0",
     "http-server": "~0.10.0",
+    "inherits": "~2.0.3",
     "istanbul": "^0.4.5",
     "jshint": "2.9.5",
+    "lie": "^3.3.0",
+    "mkdirp": "^0.5.1",
     "mocha": "~4.1.0",
     "phantomjs-prebuilt": "^2.1.16",
-    "pouchdb-find": "^6.4.1",
+    "pouchdb-find": "^6.4.3",
     "pouchdb-memory": "^6.0.0",
-    "request": "^2.83.0",
-    "sauce-connect-launcher": "^1.2.3",
-    "selenium-standalone": "^6.12.0",
-    "uglify-js": "^3.3.5",
+    "pouchdb-utils": "^6.4.3",
+    "request": "^2.85.0",
+    "rollup": "^0.58.2",
+    "rollup-plugin-babel": "^3.0.4",
+    "rollup-plugin-commonjs": "^9.1.3",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "sauce-connect-launcher": "^1.2.4",
+    "selenium-standalone": "^6.14.0",
+    "uglify-js": "^3.3.23",
     "watchify": "~3.9.0",
-    "wd": "^1.5.0",
-    "mkdirp": "^0.5.1"
+    "wd": "^1.6.2"
   },
-  "files": ["lib", "dist"]
+  "files": [
+    "lib",
+    "dist"
+  ]
 }

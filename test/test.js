@@ -1,14 +1,14 @@
 /*jshint expr:true */
 'use strict';
 
-var Pouch = require('pouchdb-memory');
+window.PouchDB = require('pouchdb-memory');
 
 //
 // your plugin goes here
 //
-var plugin = require('../lib');
-Pouch.plugin(plugin)
-  .plugin(require('pouchdb-find'));
+
+var plugin = require('../dist/pouchdb.relational-pouch');
+PouchDB.plugin(require('pouchdb-find'));
 
 var chai = require('chai');
 chai.use(require("chai-as-promised"));
@@ -31,7 +31,7 @@ function tests(dbName, dbType) {
   var db;
 
   beforeEach(function () {
-    db = new Pouch(dbName);
+    db = new PouchDB(dbName);
     return db;
   });
   afterEach(function () {

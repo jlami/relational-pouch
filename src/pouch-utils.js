@@ -1,10 +1,10 @@
-'use strict';
 
-var Promise = require('pouchdb-promise');
+export { default as extend } from 'pouchdb-extend';
+
 /* istanbul ignore next */
-exports.once = function (fun) {
+export function once(fun) {
   var called = false;
-  return exports.getArguments(function (args) {
+  return getArguments(function (args) {
     if (called) {
       console.trace();
       throw new Error('once called  more than once');
@@ -13,9 +13,9 @@ exports.once = function (fun) {
       fun.apply(this, args);
     }
   });
-};
+}
 /* istanbul ignore next */
-exports.getArguments = function (fun) {
+export function getArguments(fun) {
   return function () {
     var len = arguments.length;
     var args = new Array(len);
@@ -25,11 +25,11 @@ exports.getArguments = function (fun) {
     }
     return fun.call(this, args);
   };
-};
+}
 /* istanbul ignore next */
-exports.toPromise = function (func) {
+export function toPromise(func) {
   //create the function we will be returning
-  return exports.getArguments(function (args) {
+  return getArguments(function (args) {
     var self = this;
     var tempCB = (typeof args[args.length - 1] === 'function') ? args.pop() : false;
     // if the last argument is a function, assume its a callback
@@ -45,7 +45,7 @@ exports.toPromise = function (func) {
     }
     var promise = new Promise(function (fulfill, reject) {
       try {
-        var callback = exports.once(function (err, mesg) {
+        var callback = once(function (err, mesg) {
           if (err) {
             reject(err);
           } else {
@@ -74,8 +74,8 @@ exports.toPromise = function (func) {
 };
 
 // execute some promises in a chain
-exports.series = function (promiseFactories) {
-  var chain = exports.Promise.resolve();
+export function series(promiseFactories) {
+  var chain = Promise.resolve();
   var overallRes = new Array(promiseFactories.length);
   promiseFactories.forEach(function (promiseFactory, i) {
     chain = chain.then(promiseFactories[i]).then(function (res) {
@@ -86,7 +86,3 @@ exports.series = function (promiseFactories) {
     return overallRes;
   });
 };
-
-exports.inherits = require('inherits');
-exports.Promise = Promise;
-exports.extend = require('pouchdb-extend');

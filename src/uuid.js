@@ -1,5 +1,3 @@
-"use strict";
-
 // BEGIN Math.uuid.js
 
 /*!
@@ -78,7 +76,4 @@ function uuid(len, radix) {
   return out;
 }
 
-
-
-module.exports = uuid;
-
+export default uuid;
