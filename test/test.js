@@ -1,13 +1,15 @@
 /*jshint expr:true */
 'use strict';
 
-window.PouchDB = require('pouchdb-memory');
+var PouchDB = require('pouchdb-memory');
 
 //
 // your plugin goes here
 //
 
-var plugin = require('../dist/pouchdb.relational-pouch');
+import plugin from '../src/index';
+
+PouchDB.plugin(plugin);
 PouchDB.plugin(require('pouchdb-find'));
 
 var chai = require('chai');
@@ -20,7 +22,7 @@ var should = chai.should(); // var should = chai.should();
 var Promise = require('bluebird'); // var Promise = require('bluebird');
 
 var dbs = 'testdb' + Math.random() +
-    ',http://localhost:5984/testdb' + Math.round(Math.random() * 100000);
+    '';//',http://localhost:5984/testdb' + Math.round(Math.random() * 100000);
 
 dbs.split(',').forEach(function (db) {
   var dbType = /^http/.test(db) ? 'http' : 'local';
