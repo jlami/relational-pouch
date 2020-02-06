@@ -12,38 +12,69 @@ var fs = require('fs');
 var indexfile = "./test/test.js";
 var dotfile = "./test/.test-bundle.js";
 var outfile = "./test/test-bundle.js";
-var watchify = require("watchify");
-var browserify = require('browserify');
-var b = browserify(indexfile, {
-  cache: {},
-  packageCache: {},
-  plugin: [watchify]
-})
-
-b.on('update', bundle);
-bundle();
+var webpack = require('webpack');
+var path = require('path');
+var b = webpack({
+  target: "web",
+	entry: "./test/test.js",
+	mode: 'development',
+	devtool: 'source-map',
+	output: {
+	  path: path.resolve(__dirname, '../test'),
+	  filename: 'test-bundle.js',
+    libraryTarget: 'umd',
+  },
+  plugins: [
+  ],
+  module: {
+    rules: [
+      {
+        enforce: 'pre',
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'eslint-loader',
+      },
+      {
+        test: /\.m?js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              ['@babel/preset-env',
+              {
+                "targets": "last 1 Chrome versions",
+                "modules": false,
+                useBuiltIns: "usage",
+                corejs: 3,
+              }],
+            ],
+          },
+        }
+      }
+    ]
+  },
+}).watch({}, (error, stats) => {
+  if (error) {
+    console.error(error);
+    return;
+  }
+  
+  let logOptions = {all: false, colors: true, assets: true, errors: true, errorDetails: true, warnings: true, errorStack: true};
+  if (!stats.hasErrors()) {
+    console.log('Updated');
+    console.log(stats.toString(logOptions));
+    filesWritten = true;
+    checkReady();
+  } else {
+    const info = stats.toJson();
+    console.error(stats.toString(logOptions));//children: false, entrypoints: false, hash: false, modules: false, , chunks: false
+  }
+});
 
 var filesWritten = false;
 var serverStarted = false;
 var readyCallback;
-
-function bundle() {
-  var wb = b.bundle();
-  wb.on('error', function (err) {
-    console.error(String(err));
-  });
-  wb.on("end", end);
-  wb.pipe(fs.createWriteStream(dotfile));
-
-  function end() {
-    fs.rename(dotfile, outfile, function (err) {
-      if (err) { return console.error(err); }
-      console.log('Updated:', outfile);
-      filesWritten = true;
-      checkReady();
-    });
-  }
-}
 
 function startServers(callback) {
   readyCallback = callback;
